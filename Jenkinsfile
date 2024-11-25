@@ -31,6 +31,12 @@ pipeline {
                 sh "mvn clean package -DskipTests"
             }
         }
+
+        stage ('Archive Artifacts'){
+           steps {
+               archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
+               }
+        }
         
         stage ('Docker build and tag') {
             steps {
