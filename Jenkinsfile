@@ -92,29 +92,27 @@ pipeline {
                 }
             }
         }
-        def parallel_build_trigger = {
-    // List of builds to trigger
-    def builds_to_trigger = [    
-	
-	"Bar-test/second-job/main"
-	
-	]
-	
-	 // Define a map to hold the build steps
-    def builds = [:]
-	
-	    for(i = 0; i < builds_to_trigger.size(); i += 1) {
-        def current_build = builds_to_trigger[i]
-        builds["${current_build}"] = {
-          build wait: false, job: "${current_build}"
+   stage('Trigger Parallel Builds') {
+            steps {
+                script {
+                    def parallel_build_trigger = [:]
+                    
+                    // List of builds to trigger in parallel
+                    def builds_to_trigger = [
+                        "Bar-test/second-job/main"
+                    ]
+                    
+                    for (i = 0; i < builds_to_trigger.size(); i++) {
+                        def current_build = builds_to_trigger[i]
+                        parallel_build_trigger["${current_build}"] = {
+                            build wait: false, job: "${current_build}"
+                        }
+                    }
+                    
+                    // Trigger all the builds in parallel
+                    parallel parallel_build_trigger
+                }
+            }
         }
-    }
-	
-	    // Trigger all builds in parallel
-    parallel build
-	
-hook.addPostHook(StageName.POST_BUILD, parallel_build_trigger)
-
-}
     }
 }
